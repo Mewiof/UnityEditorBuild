@@ -1,5 +1,5 @@
 # UnityEditorBuild
-A simple script that allows you to quickly build your project on different platforms with a few clicks.
+A simple script that allows you to quickly build your project for different platforms with a few clicks.
 
 > I don't guarantee continuous repository support or avoiding breaking changes
 
