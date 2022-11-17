@@ -75,7 +75,7 @@ public class PrefWindow : EditorWindow {
 		GUILayout.FlexibleSpace();
 		GUILayoutOption buttonMinWidth = GUILayout.MinWidth(96f);
 		if (GUILayout.Button("Add", buttonMinWidth)) {
-			string path = EditorUtility.OpenFolderPanel("Directory", string.Empty, string.Empty);
+			string path = EditorUtility.OpenFolderPanel("Directory", "Assets", string.Empty);
 			if (path.Contains("/Assets/")) {
 				path = path.Split("/Assets/")[1];
 				if (!BuildStripper.dirsToExclude.Contains(path)) {
