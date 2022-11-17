@@ -34,7 +34,11 @@ public static class EditorBuild {
 		EditorPrefs.SetInt(nameof(defaultBuildTargetGroup), (int)defaultBuildTargetGroup);
 		EditorPrefs.SetInt(nameof(defaultBuildTarget), (int)defaultBuildTarget);
 
-		EditorPrefs.SetString(nameof(BuildStripper.dirsToExclude), string.Join(UNIQUE_SEPARATOR, BuildStripper.dirsToExclude));
+		if (BuildStripper.dirsToExclude.Count > 0) {
+			EditorPrefs.SetString(nameof(BuildStripper.dirsToExclude), string.Join(UNIQUE_SEPARATOR, BuildStripper.dirsToExclude));
+		} else {
+			EditorPrefs.DeleteKey(nameof(BuildStripper.dirsToExclude));
+		}
 	}
 
 	private static void Build(BuildTargetGroup targetGroup, BuildTarget target, BuildOptions options, bool server, string fileFormat, bool revealInFinder) {
