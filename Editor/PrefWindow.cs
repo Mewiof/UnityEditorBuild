@@ -65,11 +65,12 @@ public class PrefWindow : EditorWindow {
 		EditorGUILayout.Space(12f);
 		EditorGUILayout.LabelField("Directories To Exclude (Server Builds)", EditorStyles.boldLabel);
 		_scrollPos = EditorGUILayout.BeginScrollView(_scrollPos, _scrollBackground);
+		EditorGUILayout.Space(2f);
 		for (int i = 0; i < BuildStripper.dirsToExclude.Count; i++) {
-			EditorGUILayout.Space(2f);
 			if (GUILayout.Button(string.Concat("'", BuildStripper.dirsToExclude[i], "'"), _selIndex == i ? _selectedElem : _elem)) {
 				_selIndex = i;
 			}
+			EditorGUILayout.Space(2f);
 		}
 		EditorGUILayout.EndScrollView();
 		_ = EditorGUILayout.BeginHorizontal();
