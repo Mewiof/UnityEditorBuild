@@ -19,28 +19,24 @@ public class PrefWindow : EditorWindow {
 	private static GUIStyle _elem;
 	private static GUIStyle _selectedElem;
 
-	private void OnEnable() {
-		try {
-			Vector2 size = new(512f, 256f);
-			minSize = size;
-			maxSize = size;
+	private void RefreshValues() {
+		Vector2 size = new(512f, 256f);
+		minSize = size;
+		maxSize = size;
 
-			_scrollBackground = new(EditorStyles.label);
-			Texture2D background = CreateColorTexture(new Color32(44, 44, 44, 255));
-			_scrollBackground.active.background = _scrollBackground.normal.background = background;
+		_scrollBackground = new(EditorStyles.label);
+		Texture2D background = CreateColorTexture(EditorGUIUtility.isProSkin ? new Color32(40, 40, 40, 255) : new Color32(128, 128, 128, 255));
+		_scrollBackground.active.background = _scrollBackground.normal.background = background;
 
-			_elem = new(EditorStyles.label) {
-				fixedHeight = 24f
-			};
-			background = CreateColorTexture(new Color32(64, 64, 64, 255));
-			_elem.active.background = _elem.normal.background = background;
+		_elem = new(EditorStyles.label) {
+			fixedHeight = 24f
+		};
+		background = CreateColorTexture(EditorGUIUtility.isProSkin ? new Color32(64, 64, 64, 255) : new Color32(192, 192, 192, 255));
+		_elem.active.background = _elem.normal.background = background;
 
-			_selectedElem = new(_elem);
-			background = CreateColorTexture(new Color32(88, 88, 88, 255));
-			_selectedElem.active.background = _selectedElem.normal.background = background;
-		} catch { // rebuild
-			Close();
-		}
+		_selectedElem = new(_elem);
+		background = CreateColorTexture(EditorGUIUtility.isProSkin ? new Color32(88, 88, 88, 255) : new Color32(240, 240, 240, 255));
+		_selectedElem.active.background = _selectedElem.normal.background = background;
 	}
 
 	private static void TrySet<T>(ref T reference, T newValue) {
@@ -54,6 +50,11 @@ public class PrefWindow : EditorWindow {
 	private static int _selIndex;
 
 	private void OnGUI() {
+		// rebuild support
+		if (_scrollBackground == null) {
+			RefreshValues();
+		}
+
 		EditorGUILayout.LabelField("Editor Platform", EditorStyles.boldLabel);
 
 		TrySet(ref EditorBuild.defaultBuildTargetGroup,
