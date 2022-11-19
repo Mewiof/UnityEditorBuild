@@ -19,11 +19,9 @@ public class PrefWindow : EditorWindow {
 	private static GUIStyle _elem;
 	private static GUIStyle _selectedElem;
 
-	private void RefreshValues() {
-		Vector2 size = new(512f, 256f);
-		minSize = size;
-		maxSize = size;
+	private readonly Vector2 _size = new(512f, 256f);
 
+	private void RefreshValues() {
 		_scrollBackground = new(EditorStyles.label);
 		Texture2D background = CreateColorTexture(EditorGUIUtility.isProSkin ? new Color32(40, 40, 40, 255) : new Color32(128, 128, 128, 255));
 		_scrollBackground.active.background = _scrollBackground.normal.background = background;
@@ -48,6 +46,11 @@ public class PrefWindow : EditorWindow {
 
 	private static Vector2 _scrollPos;
 	private static int _selIndex;
+
+	private void OnEnable() {
+		minSize = _size;
+		maxSize = _size;
+	}
 
 	private void OnGUI() {
 		// rebuild support
