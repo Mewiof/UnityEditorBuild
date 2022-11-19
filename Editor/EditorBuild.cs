@@ -25,9 +25,10 @@ public static class EditorBuild {
 		defaultBuildTargetGroup = (BuildTargetGroup)EditorPrefs.GetInt(nameof(defaultBuildTargetGroup), (int)BuildTargetGroup.Standalone);
 		defaultBuildTarget = (BuildTarget)EditorPrefs.GetInt(nameof(defaultBuildTarget), (int)BuildTarget.StandaloneWindows64);
 
-		string dirsToExcludeDefaultValue = string.Concat("Audio", UNIQUE_SEPARATOR, "Sprites");
-		BuildStripper.dirsToExclude =
-			new(EditorPrefs.GetString(nameof(BuildStripper.dirsToExclude), dirsToExcludeDefaultValue).Split(UNIQUE_SEPARATOR, System.StringSplitOptions.None));
+		if (EditorPrefs.HasKey(nameof(BuildStripper.dirsToExclude))) {
+			BuildStripper.dirsToExclude =
+			new(EditorPrefs.GetString(nameof(BuildStripper.dirsToExclude)).Split(UNIQUE_SEPARATOR, System.StringSplitOptions.None));
+		}
 	}
 
 	public static void Save() {
@@ -78,12 +79,19 @@ public static class EditorBuild {
 		EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Player;
 	}
 
+	public const string
+		WINDOWS_EXTENSION = ".exe",
+		LINUX_EXTENSION = ".x86_64",
+		ANDROID_BUNDLE_EXTENSION = ".aab",
+		ANDROID_EXTENSION = ".apk";
+
+	#region Windows
 	private static void BuildWindows(bool server) {
 		Build(BuildTargetGroup.Standalone,
 			BuildTarget.StandaloneWindows64,
 			BuildOptions.None,
 			server,
-			".exe",
+			WINDOWS_EXTENSION,
 			true);
 	}
 
@@ -103,26 +111,60 @@ public static class EditorBuild {
 		BuildStripper.RevertStrip();
 		BuildWindowsClient();
 	}
+	#endregion
 
-	[MenuItem("Build/Android")]
+	#region Linux
+	private static void BuildLinux(bool server) {
+		Build(BuildTargetGroup.Standalone,
+			BuildTarget.StandaloneLinux64,
+			BuildOptions.None,
+			server,
+			LINUX_EXTENSION,
+			true);
+	}
+
+	[MenuItem("Build/Linux (x64)/Client")]
+	public static void BuildLinuxClient() {
+		BuildLinux(false);
+	}
+
+	[MenuItem("Build/Linux (x64)/Server")]
+	public static void BuildLinuxServer() {
+		BuildLinux(true);
+	}
+
+	[MenuItem("Build/Linux (x64)/Both")]
+	public static void BuildLinuxBoth() {
+		BuildLinuxServer();
+		BuildStripper.RevertStrip();
+		BuildLinuxClient();
+	}
+	#endregion
+
+	#region Android
+	private static void BuildAndroid(bool bundle, BuildOptions options) {
+		EditorUserBuildSettings.buildAppBundle = bundle;
+		Build(BuildTargetGroup.Android,
+			BuildTarget.Android,
+			options,
+			false,
+			bundle ? ANDROID_BUNDLE_EXTENSION : ANDROID_EXTENSION,
+			true);
+	}
+
+	[MenuItem("Build/Android/AAB")]
+	public static void BuildAndroidBundle() {
+		BuildAndroid(true, BuildOptions.UncompressedAssetBundle);
+	}
+
+	[MenuItem("Build/Android/APK")]
 	public static void BuildAndroid() {
-		EditorUserBuildSettings.buildAppBundle = true;
-		Build(BuildTargetGroup.Android,
-			BuildTarget.Android,
-			BuildOptions.UncompressedAssetBundle,
-			false,
-			".aab",
-			true);
+		BuildAndroid(false, BuildOptions.None);
 	}
 
-	[MenuItem("Build/Android (Run)")]
+	[MenuItem("Build/Android/Development (Run)")]
 	public static void BuildAndroidRun() {
-		EditorUserBuildSettings.buildAppBundle = false;
-		Build(BuildTargetGroup.Android,
-			BuildTarget.Android,
-			BuildOptions.AutoRunPlayer | BuildOptions.Development,
-			false,
-			".apk",
-			true);
+		BuildAndroid(false, BuildOptions.AutoRunPlayer | BuildOptions.Development);
 	}
+	#endregion
 }
