@@ -1,3 +1,4 @@
+using UnityEngine;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
@@ -22,23 +23,23 @@ public static class EditorBuild {
 
 	[InitializeOnLoadMethod]
 	private static void Load() {
-		defaultBuildTargetGroup = (BuildTargetGroup)EditorPrefs.GetInt(nameof(defaultBuildTargetGroup), (int)BuildTargetGroup.Standalone);
-		defaultBuildTarget = (BuildTarget)EditorPrefs.GetInt(nameof(defaultBuildTarget), (int)BuildTarget.StandaloneWindows64);
+		defaultBuildTargetGroup = (BuildTargetGroup)PlayerPrefs.GetInt(nameof(defaultBuildTargetGroup), (int)BuildTargetGroup.Standalone);
+		defaultBuildTarget = (BuildTarget)PlayerPrefs.GetInt(nameof(defaultBuildTarget), (int)BuildTarget.StandaloneWindows64);
 
-		if (EditorPrefs.HasKey(nameof(BuildStripper.dirsToExclude))) {
+		if (PlayerPrefs.HasKey(nameof(BuildStripper.dirsToExclude))) {
 			BuildStripper.dirsToExclude =
-			new(EditorPrefs.GetString(nameof(BuildStripper.dirsToExclude)).Split(UNIQUE_SEPARATOR, System.StringSplitOptions.None));
+			new(PlayerPrefs.GetString(nameof(BuildStripper.dirsToExclude)).Split(UNIQUE_SEPARATOR, System.StringSplitOptions.None));
 		}
 	}
 
 	public static void Save() {
-		EditorPrefs.SetInt(nameof(defaultBuildTargetGroup), (int)defaultBuildTargetGroup);
-		EditorPrefs.SetInt(nameof(defaultBuildTarget), (int)defaultBuildTarget);
+		PlayerPrefs.SetInt(nameof(defaultBuildTargetGroup), (int)defaultBuildTargetGroup);
+		PlayerPrefs.SetInt(nameof(defaultBuildTarget), (int)defaultBuildTarget);
 
 		if (BuildStripper.dirsToExclude.Count > 0) {
-			EditorPrefs.SetString(nameof(BuildStripper.dirsToExclude), string.Join(UNIQUE_SEPARATOR, BuildStripper.dirsToExclude));
+			PlayerPrefs.SetString(nameof(BuildStripper.dirsToExclude), string.Join(UNIQUE_SEPARATOR, BuildStripper.dirsToExclude));
 		} else {
-			EditorPrefs.DeleteKey(nameof(BuildStripper.dirsToExclude));
+			PlayerPrefs.DeleteKey(nameof(BuildStripper.dirsToExclude));
 		}
 	}
 
@@ -47,7 +48,7 @@ public static class EditorBuild {
 		if (server) {
 			dirName += "Server";
 		}
-		string fileName = server ? "Server" : UnityEngine.Application.productName;//?
+		string fileName = server ? "Server" : Application.productName;//?
 		fileName += fileFormat;
 
 		BuildPlayerOptions playerOptions = new() {
