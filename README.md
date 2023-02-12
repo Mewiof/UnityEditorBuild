@@ -1,10 +1,17 @@
 ## UnityEditorBuild
 
-A simple solution that allows you to quickly build your project with a few clicks.
-In `Preferences` you can configure which directories will be excluded when building a server (e.g. 'Audio', 'Fonts' etc.).
+Requirements: `Unity 2021 LTS+`, `.NET Standard 2.1`
 
-Requirements: `Unity 2021+`, `.NET Standard 2.1`
+![UwU](https://user-images.githubusercontent.com/115415388/218286170-7d1291af-4e16-4e7e-b609-8bf2de2fac72.png)
 
-![owo](https://user-images.githubusercontent.com/115415388/202342718-ed4f4614-df8c-446f-8b0d-7dab6596b845.gif)
+##### Example:
+```csharp
+string versionStr =
+	string.Concat("Version ", Application.version,
+	" (", BuildInfo.BuildNumber, ")\n", BuildInfo.Timestamp.ToString("MMMM M, yyyy"));
+```
+
+##### Result:
+![OwO](https://user-images.githubusercontent.com/115415388/218285850-3f78dd24-25c0-4277-8c2d-13e8e42a28d3.png)
 
 > The code is based on [JesusLuvsYooh](https://github.com/JesusLuvsYooh/BuildStripper)'s idea
