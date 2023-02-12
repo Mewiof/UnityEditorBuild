@@ -10,6 +10,10 @@ namespace UnityEngine {
 					BuildInfo[] assets = Resources.LoadAll<BuildInfo>(string.Empty);
 					if (assets == null || assets.Length < 1) {
 #if UNITY_EDITOR
+						string resDirPath = System.IO.Path.Combine(Application.dataPath, "Resources");
+						if (!System.IO.Directory.Exists(resDirPath)) {
+							System.IO.Directory.CreateDirectory(resDirPath);
+						}
 						_instance = CreateInstance<BuildInfo>();
 						UnityEditor.AssetDatabase.CreateAsset(_instance, "Assets/Resources/BuildInfo.asset");
 						UnityEditor.AssetDatabase.SaveAssets();
