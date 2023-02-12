@@ -28,19 +28,7 @@ namespace UnityEngine {
 
 		public const string UNIQUE_SEPARATOR = "MeWiof~OwO~MeWiof";
 
-		[InitializeOnLoadMethod]
-		private static void Load() {
-			defaultBuildTargetGroup = (BuildTargetGroup)PlayerPrefs.GetInt(nameof(defaultBuildTargetGroup), (int)BuildTargetGroup.Standalone);
-			defaultBuildTarget = (BuildTarget)PlayerPrefs.GetInt(nameof(defaultBuildTarget), (int)BuildTarget.StandaloneWindows64);
-
-			serverRunArguments = PlayerPrefs.GetString(nameof(serverRunArguments), string.Empty);
-
-			if (PlayerPrefs.HasKey(nameof(BuildStripper.dirsToExclude))) {
-				BuildStripper.dirsToExclude =
-				new(PlayerPrefs.GetString(nameof(BuildStripper.dirsToExclude)).Split(UNIQUE_SEPARATOR, System.StringSplitOptions.None));
-			}
-		}
-
+		#region Save & Load
 		public static void Save() {
 			PlayerPrefs.SetInt(nameof(defaultBuildTargetGroup), (int)defaultBuildTargetGroup);
 			PlayerPrefs.SetInt(nameof(defaultBuildTarget), (int)defaultBuildTarget);
@@ -54,7 +42,26 @@ namespace UnityEngine {
 			}
 		}
 
+		[InitializeOnLoadMethod]
+		private static void Load() {
+			defaultBuildTargetGroup = (BuildTargetGroup)PlayerPrefs.GetInt(nameof(defaultBuildTargetGroup), (int)BuildTargetGroup.Standalone);
+			defaultBuildTarget = (BuildTarget)PlayerPrefs.GetInt(nameof(defaultBuildTarget), (int)BuildTarget.StandaloneWindows64);
+
+			serverRunArguments = PlayerPrefs.GetString(nameof(serverRunArguments), string.Empty);
+
+			if (PlayerPrefs.HasKey(nameof(BuildStripper.dirsToExclude))) {
+				BuildStripper.dirsToExclude =
+					new(PlayerPrefs.GetString(nameof(BuildStripper.dirsToExclude)).Split(UNIQUE_SEPARATOR, System.StringSplitOptions.None));
+			}
+		}
+		#endregion
+
+		public static string GetTaggedText(string text) {
+			return string.Concat("[Build] ", text);
+		}
+
 		private static void Build(BuildTargetGroup targetGroup, BuildTarget target, BuildOptions options, bool server, string fileFormat, bool revealInFinder, bool run) {
+			// dir & file names
 			string dirName = target.ToString();
 			if (server) {
 				dirName += "Server";
@@ -67,23 +74,25 @@ namespace UnityEngine {
 				options = options
 			};
 
+			// sub & strip
 			if (server) {
 				_ = EditorUserBuildSettings.SwitchActiveBuildTarget(NamedBuildTarget.Server, target);
 				EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Server;
+				playerOptions.subtarget = (int)StandaloneBuildSubtarget.Server;
 				BuildStripper.Strip();
 			} else {
 				_ = EditorUserBuildSettings.SwitchActiveBuildTarget(targetGroup, target);
 				EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Player;
+				playerOptions.subtarget = (int)StandaloneBuildSubtarget.Player;
 			}
 
 			// additional options
 			playerOptions.targetGroup = targetGroup;
 			playerOptions.target = target;
-			playerOptions.subtarget = server ? (int)StandaloneBuildSubtarget.Server : (int)StandaloneBuildSubtarget.Player;
 			playerOptions.scenes = Scenes;
 
 			// set UTC build timestamp
-			BuildInfo.Instance.timestampTicks = System.DateTime.UtcNow.Ticks;
+			BuildInfo.Instance.lastBuildAttemptTimestampTicks = System.DateTime.UtcNow.Ticks;
 			BuildInfo.Instance.Save();
 
 			BuildReport buildReport = BuildPipeline.BuildPlayer(playerOptions);
@@ -98,7 +107,7 @@ namespace UnityEngine {
 				}
 
 				// increment & log
-				string reportLogTags = string.Concat("[Build] [", target.ToString(), "] ");
+				string reportLogTags = GetTaggedText(string.Concat('[', target.ToString(), "] "));
 
 				if (!server) {
 					string buildNumberStr = null;
@@ -115,6 +124,7 @@ namespace UnityEngine {
 							buildNumberStr = BuildInfo.Instance.androidClientBuildNumber++.ToString();
 							break;
 					}
+
 					BuildInfo.Instance.Save();
 
 					if (buildNumberStr != null) {
@@ -125,7 +135,7 @@ namespace UnityEngine {
 				Debug.Log(string.Concat(reportLogTags, "Success. Ignore '.meta' warnings (if any)"));
 			}
 
-			// switch to editor target
+			// switch to default target
 			_ = EditorUserBuildSettings.SwitchActiveBuildTarget(defaultBuildTargetGroup, defaultBuildTarget);
 			EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Player;
 		}

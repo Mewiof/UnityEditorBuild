@@ -24,11 +24,7 @@ namespace UnityEngine {
 
 		private readonly Vector2 _size = new(512f, 448f);
 
-		private void TrySetupStyles() {
-			if (_scrollBackgroundStyle != null) {
-				return;
-			}
-
+		private void SetupStyles() {
 			_scrollBackgroundStyle = new(EditorStyles.label);
 			_scrollBackgroundStyle.active.background = _scrollBackgroundStyle.normal.background =
 				CreateColorTexture(EditorGUIUtility.isProSkin ? new Color32(40, 40, 40, 255) : new Color32(128, 128, 128, 255));
@@ -62,10 +58,23 @@ namespace UnityEngine {
 			minSize = _size;
 			maxSize = _size;
 			_selIndex = 0;
+
+			// hard reload support
+			try {
+				SetupStyles();
+			} catch { }
 		}
 
 		private void OnGUI() {
-			TrySetupStyles();
+			if (BuildPipeline.isBuildingPlayer) {
+				Close();
+				return;
+			}
+
+			// hard reload support
+			if (_scrollBackgroundStyle == null) {
+				SetupStyles();
+			}
 
 			EditorGUILayout.LabelField("Editor Platform", EditorStyles.boldLabel);
 
@@ -88,32 +97,40 @@ namespace UnityEngine {
 			EditorGUILayout.Space(12f);
 			EditorGUILayout.LabelField("Directories To Exclude");
 			_scrollPos = EditorGUILayout.BeginScrollView(_scrollPos, _scrollBackgroundStyle);
-			EditorGUILayout.Space(2f);
-			for (int i = 0; i < BuildStripper.dirsToExclude.Count; i++) {
-				if (GUILayout.Button(string.Concat('"', BuildStripper.dirsToExclude[i], '"'), _selIndex == i ? _selectedElemStyle : _elemStyle)) {
-					_selIndex = i;
-				}
+			{
 				EditorGUILayout.Space(2f);
+				for (int i = 0; i < BuildStripper.dirsToExclude.Count; i++) {
+					if (GUILayout.Button(string.Concat('"', BuildStripper.dirsToExclude[i], '"'), _selIndex == i ? _selectedElemStyle : _elemStyle)) {
+						_selIndex = i;
+					}
+					EditorGUILayout.Space(2f);
+				}
 			}
 			EditorGUILayout.EndScrollView();
+
+			// buttons
 			_ = EditorGUILayout.BeginHorizontal();
-			GUILayout.FlexibleSpace();
-			GUILayoutOption buttonMinWidth = GUILayout.MinWidth(96f);
-			if (GUILayout.Button("Add", buttonMinWidth)) {
-				string path = EditorUtility.OpenFolderPanel("Directory", "Assets", string.Empty);
-				if (path.Contains("/Assets/")) {
-					path = path.Split("/Assets/")[1];
-					if (!BuildStripper.dirsToExclude.Contains(path)) {
-						BuildStripper.dirsToExclude.Add(path);
-						EditorBuild.Save();
+			{
+				GUILayout.FlexibleSpace();
+				GUILayoutOption buttonMinWidth = GUILayout.MinWidth(96f);
+				if (GUILayout.Button("Add", buttonMinWidth)) {
+					// add
+					string path = EditorUtility.OpenFolderPanel("Directory", "Assets", string.Empty);
+					if (path.Contains("/Assets/")) {
+						path = path.Split("/Assets/")[1];
+						if (!BuildStripper.dirsToExclude.Contains(path)) {
+							BuildStripper.dirsToExclude.Add(path);
+							EditorBuild.Save();
+						}
+					} else if (!string.IsNullOrEmpty(path)) {
+						Debug.LogError(EditorBuild.GetTaggedText("Invalid path"));
 					}
-				} else if (!string.IsNullOrEmpty(path)) {
-					Debug.LogError("[Build] Invalid path");
 				}
-			}
-			if (GUILayout.Button("Remove", buttonMinWidth) && BuildStripper.dirsToExclude.Count > _selIndex) {
-				BuildStripper.dirsToExclude.RemoveAt(_selIndex);
-				EditorBuild.Save();
+				if (GUILayout.Button("Remove", buttonMinWidth) && BuildStripper.dirsToExclude.Count > _selIndex) {
+					// remove
+					BuildStripper.dirsToExclude.RemoveAt(_selIndex);
+					EditorBuild.Save();
+				}
 			}
 			EditorGUILayout.EndHorizontal();
 		}
