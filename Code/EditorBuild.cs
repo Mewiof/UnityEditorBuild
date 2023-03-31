@@ -35,10 +35,10 @@ namespace UnityEngine {
 
 			PlayerPrefs.SetString(nameof(serverRunArguments), serverRunArguments);
 
-			if (BuildStripper.dirsToExclude.Count > 0) {
-				PlayerPrefs.SetString(nameof(BuildStripper.dirsToExclude), string.Join(UNIQUE_SEPARATOR, BuildStripper.dirsToExclude));
+			if (BuildStripper.clientDirs.Count > 0) {
+				PlayerPrefs.SetString(nameof(BuildStripper.clientDirs), string.Join(UNIQUE_SEPARATOR, BuildStripper.clientDirs));
 			} else {
-				PlayerPrefs.DeleteKey(nameof(BuildStripper.dirsToExclude));
+				PlayerPrefs.DeleteKey(nameof(BuildStripper.clientDirs));
 			}
 		}
 
@@ -49,9 +49,9 @@ namespace UnityEngine {
 
 			serverRunArguments = PlayerPrefs.GetString(nameof(serverRunArguments), string.Empty);
 
-			if (PlayerPrefs.HasKey(nameof(BuildStripper.dirsToExclude))) {
-				BuildStripper.dirsToExclude =
-					new(PlayerPrefs.GetString(nameof(BuildStripper.dirsToExclude)).Split(UNIQUE_SEPARATOR, System.StringSplitOptions.None));
+			if (PlayerPrefs.HasKey(nameof(BuildStripper.clientDirs))) {
+				BuildStripper.clientDirs =
+					new(PlayerPrefs.GetString(nameof(BuildStripper.clientDirs)).Split(UNIQUE_SEPARATOR, System.StringSplitOptions.None));
 			}
 		}
 		#endregion
@@ -96,6 +96,8 @@ namespace UnityEngine {
 			BuildInfo.Instance.Save();
 
 			BuildReport buildReport = BuildPipeline.BuildPlayer(playerOptions);
+
+			BuildStripper.RevertStrip();
 
 			if (buildReport.summary.result == BuildResult.Succeeded) {
 				if (revealInFinder) {

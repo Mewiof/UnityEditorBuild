@@ -99,8 +99,8 @@ namespace UnityEngine {
 			_scrollPos = EditorGUILayout.BeginScrollView(_scrollPos, _scrollBackgroundStyle);
 			{
 				EditorGUILayout.Space(2f);
-				for (int i = 0; i < BuildStripper.dirsToExclude.Count; i++) {
-					if (GUILayout.Button(string.Concat('"', BuildStripper.dirsToExclude[i], '"'), _selIndex == i ? _selectedElemStyle : _elemStyle)) {
+				for (int i = 0; i < BuildStripper.clientDirs.Count; i++) {
+					if (GUILayout.Button(string.Concat('"', BuildStripper.clientDirs[i], '"'), _selIndex == i ? _selectedElemStyle : _elemStyle)) {
 						_selIndex = i;
 					}
 					EditorGUILayout.Space(2f);
@@ -118,17 +118,17 @@ namespace UnityEngine {
 					string path = EditorUtility.OpenFolderPanel("Directory", "Assets", string.Empty);
 					if (path.Contains("/Assets/")) {
 						path = path.Split("/Assets/")[1];
-						if (!BuildStripper.dirsToExclude.Contains(path)) {
-							BuildStripper.dirsToExclude.Add(path);
+						if (!BuildStripper.clientDirs.Contains(path)) {
+							BuildStripper.clientDirs.Add(path);
 							EditorBuild.Save();
 						}
 					} else if (!string.IsNullOrEmpty(path)) {
 						Debug.LogError(EditorBuild.GetTaggedText("Invalid path"));
 					}
 				}
-				if (GUILayout.Button("Remove", buttonMinWidth) && BuildStripper.dirsToExclude.Count > _selIndex) {
+				if (GUILayout.Button("Remove", buttonMinWidth) && BuildStripper.clientDirs.Count > _selIndex) {
 					// remove
-					BuildStripper.dirsToExclude.RemoveAt(_selIndex);
+					BuildStripper.clientDirs.RemoveAt(_selIndex);
 					EditorBuild.Save();
 				}
 			}
