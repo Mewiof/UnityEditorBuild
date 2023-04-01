@@ -7,6 +7,8 @@ namespace UnityEngine {
 	public static class BuildStripper {
 
 		public static List<string> clientDirs = new();
+		private static readonly List<string> _serverDirs = new() { "ServerOnly" };
+		private static List<string> _dirsToExclude;
 
 		private static void CheckBuild() {
 			if (!BuildPipeline.isBuildingPlayer) {
@@ -22,10 +24,11 @@ namespace UnityEngine {
 			Debug.LogError(EditorBuild.GetTaggedText(string.Concat("Error: \"", pathA, "\"->\"", pathB, "\"\n", errorText)));
 		}
 
-		public static void Strip() {
+		public static void Strip(bool server) {
+			_dirsToExclude = server ? clientDirs : _serverDirs;
 			EditorApplication.update += CheckBuild;
-			for (int i = 0; i < clientDirs.Count; i++) {
-				string dirPath = string.Concat("Assets/", clientDirs[i]);
+			for (int i = 0; i < _dirsToExclude.Count; i++) {
+				string dirPath = string.Concat("Assets/", _dirsToExclude[i]);
 				if (!AssetDatabase.IsValidFolder(dirPath)) {
 					continue;
 				}
@@ -36,8 +39,8 @@ namespace UnityEngine {
 
 		public static void RevertStrip() {
 			EditorApplication.update -= CheckBuild;
-			for (int i = 0; i < clientDirs.Count; i++) {
-				string dirPath = string.Concat("Assets/", clientDirs[i]);
+			for (int i = 0; i < _dirsToExclude.Count; i++) {
+				string dirPath = string.Concat("Assets/", _dirsToExclude[i]);
 				// already contains '~'?
 				if (dirPath[^1..] == "~") {
 					dirPath = dirPath[0..^1];

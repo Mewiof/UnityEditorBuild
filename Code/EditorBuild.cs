@@ -74,12 +74,11 @@ namespace UnityEngine {
 				options = options
 			};
 
-			// sub & strip
+			// sub
 			if (server) {
 				_ = EditorUserBuildSettings.SwitchActiveBuildTarget(NamedBuildTarget.Server, target);
 				EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Server;
 				playerOptions.subtarget = (int)StandaloneBuildSubtarget.Server;
-				BuildStripper.Strip();
 			} else {
 				_ = EditorUserBuildSettings.SwitchActiveBuildTarget(targetGroup, target);
 				EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Player;
@@ -95,8 +94,12 @@ namespace UnityEngine {
 			BuildInfo.Instance.lastBuildAttemptTimestampTicks = System.DateTime.UtcNow.Ticks;
 			BuildInfo.Instance.Save();
 
+			// strip
+			BuildStripper.Strip(server);
+
 			BuildReport buildReport = BuildPipeline.BuildPlayer(playerOptions);
 
+			// revert
 			BuildStripper.RevertStrip();
 
 			if (buildReport.summary.result == BuildResult.Succeeded) {
