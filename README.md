@@ -8,7 +8,7 @@ Requirements: `Unity 2021 LTS+`, `.NET Standard 2.1`
 ```csharp
 string versionStr =
 	string.Concat("Version ", Application.version,
-	" (", BuildInfo.BuildNumber, ")\n", BuildInfo.Timestamp.ToString("MMMM M, yyyy"));
+	" (", BuildInfo.BuildNumber, ")\n", BuildInfo.Timestamp.ToString("MMMM d, yyyy"));
 ```
 
 ##### Result:
