@@ -72,6 +72,11 @@ namespace UnityEngine {
 			string fileName = server ? "Server" : Application.productName;//?
 			fileName += fileFormat;
 
+			// avoid the "the path "..." does not exists" error
+			if (!System.IO.Directory.Exists("Builds")) {
+				System.IO.Directory.CreateDirectory("Builds");
+			}
+
 			BuildPlayerOptions playerOptions = new() {
 				locationPathName = System.IO.Path.Combine("Builds", dirName, fileName),
 				options = options
