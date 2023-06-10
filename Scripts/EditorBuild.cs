@@ -72,7 +72,7 @@ namespace UnityEngine {
 			string fileName = server ? "Server" : Application.productName;//?
 			fileName += fileFormat;
 
-			// avoid the "the path "..." does not exists" error
+			// avoid the "the path "..." does not exist" error
 			if (!System.IO.Directory.Exists("Builds")) {
 				System.IO.Directory.CreateDirectory("Builds");
 			}
