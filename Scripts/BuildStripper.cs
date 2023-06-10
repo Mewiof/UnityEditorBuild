@@ -10,12 +10,6 @@ namespace UnityEngine {
 		private static readonly List<string> _serverDirs = new() { "ServerOnly" };
 		private static List<string> _dirsToExclude;
 
-		private static void CheckBuild() {
-			if (!BuildPipeline.isBuildingPlayer) {
-				RevertStrip();
-			}
-		}
-
 		private static void TryMoveAsset(string pathA, string pathB) {
 			string errorText = AssetDatabase.MoveAsset(pathA, pathB);
 			if (string.IsNullOrEmpty(errorText)) {
@@ -26,7 +20,6 @@ namespace UnityEngine {
 
 		public static void Strip(bool server) {
 			_dirsToExclude = server ? clientDirs : _serverDirs;
-			EditorApplication.update += CheckBuild;
 			for (int i = 0; i < _dirsToExclude.Count; i++) {
 				string dirPath = string.Concat("Assets/", _dirsToExclude[i]);
 				if (!AssetDatabase.IsValidFolder(dirPath)) {
@@ -38,10 +31,9 @@ namespace UnityEngine {
 		}
 
 		public static void RevertStrip() {
-			EditorApplication.update -= CheckBuild;
 			for (int i = 0; i < _dirsToExclude.Count; i++) {
 				string dirPath = string.Concat("Assets/", _dirsToExclude[i]);
-				// already contains '~'?
+				// already contains "~"?
 				if (dirPath[^1..] == "~") {
 					dirPath = dirPath[0..^1];
 				}

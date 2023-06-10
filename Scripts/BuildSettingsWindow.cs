@@ -3,13 +3,14 @@ using UnityEditor;
 
 namespace UnityEngine {
 
-	public class PrefWindow : EditorWindow {
+	public sealed class BuildSettingsWindow : EditorWindow {
 
-		[MenuItem("Build/Preferences", priority = 32)]
+		[MenuItem("Build/Settings", priority = 32)]
 		private static void ShowWindow() {
-			_ = GetWindow<PrefWindow>(false, "Build Preferences");
+			_ = GetWindow<BuildSettingsWindow>(false, "Build Settings");
 		}
 
+		/// <summary>Util</summary>
 		public static Texture2D CreateColorTexture(Color color) {
 			Texture2D result = new(1, 1, TextureFormat.RGBA32, false);
 			result.SetPixel(0, 0, color);
@@ -59,19 +60,18 @@ namespace UnityEngine {
 			maxSize = _size;
 			_selIndex = 0;
 
-			// hard reload support
+			// hot reload support
 			try {
 				SetupStyles();
 			} catch { }
 		}
 
 		private void OnGUI() {
-			if (BuildPipeline.isBuildingPlayer) {
+			// hot reload support
+			if (EditorApplication.isCompiling || EditorApplication.isUpdating || BuildPipeline.isBuildingPlayer) {
 				Close();
 				return;
 			}
-
-			// hard reload support
 			if (_scrollBackgroundStyle == null) {
 				SetupStyles();
 			}

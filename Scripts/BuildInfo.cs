@@ -1,3 +1,5 @@
+using System;
+
 namespace UnityEngine {
 
 	public sealed class BuildInfo : ScriptableObject {
@@ -15,7 +17,7 @@ namespace UnityEngine {
 							System.IO.Directory.CreateDirectory(resDirPath);
 						}
 						_instance = CreateInstance<BuildInfo>();
-						UnityEditor.AssetDatabase.CreateAsset(_instance, "Assets/Resources/BuildInfo.asset");
+						UnityEditor.AssetDatabase.CreateAsset(_instance, System.IO.Path.Combine("Assets", "Resources", "BuildInfo.asset"));
 						UnityEditor.AssetDatabase.SaveAssets();
 						UnityEditor.AssetDatabase.Refresh(UnityEditor.ImportAssetOptions.ForceSynchronousImport);
 #else
@@ -41,8 +43,12 @@ namespace UnityEngine {
 			androidClientBuildNumber = 1;
 
 		[SerializeField]
-		internal long lastBuildAttemptTimestampTicks;
+		internal long lastBuildTimestamp;
 		#endregion
+
+		internal void UpdateLastBuildTimestamp() {
+			lastBuildTimestamp = DateTime.UtcNow.Ticks;
+		}
 
 #if UNITY_EDITOR
 		internal void Save() {
@@ -59,7 +65,8 @@ namespace UnityEngine {
 			_ => -1,
 		};
 
-		public static System.DateTime Timestamp => new(Instance.lastBuildAttemptTimestampTicks);
+		/// <summary>UTC</summary>
+		public static DateTime Timestamp => new(Instance.lastBuildTimestamp);
 		#endregion
 	}
 }

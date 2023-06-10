@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 
-// No apples? :(
+// no apples? :(
 
 namespace UnityEngine {
 
@@ -56,11 +56,14 @@ namespace UnityEngine {
 		}
 		#endregion
 
+		/// <summary>Util</summary>
 		public static string GetTaggedText(string text) {
 			return string.Concat("[Build] ", text);
 		}
 
 		private static void Build(BuildTargetGroup targetGroup, BuildTarget target, BuildOptions options, bool server, string fileFormat, bool revealInFinder, bool run) {
+			Load();
+
 			// dir & file names
 			string dirName = target.ToString();
 			if (server) {
@@ -91,7 +94,7 @@ namespace UnityEngine {
 			playerOptions.scenes = Scenes;
 
 			// set UTC build timestamp
-			BuildInfo.Instance.lastBuildAttemptTimestampTicks = System.DateTime.UtcNow.Ticks;
+			BuildInfo.Instance.UpdateLastBuildTimestamp();
 			BuildInfo.Instance.Save();
 
 			// strip
@@ -137,7 +140,7 @@ namespace UnityEngine {
 					}
 				}
 
-				Debug.Log(string.Concat(reportLogTags, "Success. Ignore '.meta' warnings (if any)"));
+				Debug.Log(string.Concat(reportLogTags, "Success. Ignore \".meta\" warnings (if any)"));
 			}
 
 			// switch to default target
@@ -152,35 +155,44 @@ namespace UnityEngine {
 			ANDROID_EXTENSION = ".apk";
 
 		#region Windows
-		private static void BuildWindows(bool server, bool run) {
+		private static void BuildWindows(bool server, bool run, bool dev) {
 			Build(BuildTargetGroup.Standalone,
 				BuildTarget.StandaloneWindows64,
-				BuildOptions.None,
+				dev ? BuildOptions.Development : BuildOptions.None,
 				server,
 				WINDOWS_EXTENSION,
 				!run,
 				run);
 		}
 
-		[MenuItem("Build/Windows (x64)/Client")]
+		[MenuItem("Build/Windows (x64)/Client", priority = 100)]
 		public static void BuildWindowsClient() {
-			BuildWindows(false, false);
+			BuildWindows(false, false, false);
 		}
 
-		[MenuItem("Build/Windows (x64)/Server")]
+		[MenuItem("Build/Windows (x64)/Client (Run)", priority = 101)]
+		public static void BuildWindowsClientRun() {
+			BuildWindows(false, true, false);
+		}
+
+		[MenuItem("Build/Windows (x64)/Client (Run) (Dev)", priority = 102)]
+		public static void BuildWindowsClientRunDev() {
+			BuildWindows(false, true, true);
+		}
+
+		[MenuItem("Build/Windows (x64)/Server", priority = 103)]
 		public static void BuildWindowsServer() {
-			BuildWindows(true, false);
+			BuildWindows(true, false, false);
 		}
 
-		[MenuItem("Build/Windows (x64)/Server (Run)")]
+		[MenuItem("Build/Windows (x64)/Server (Run)", priority = 104)]
 		public static void BuildWindowsServerRun() {
-			BuildWindows(true, true);
+			BuildWindows(true, true, false);
 		}
 
-		[MenuItem("Build/Windows (x64)/Both")]
+		[MenuItem("Build/Windows (x64)/Both", priority = 105)]
 		public static void BuildWindowsBoth() {
 			BuildWindowsServer();
-			BuildStripper.RevertStrip();
 			BuildWindowsClient();
 		}
 		#endregion
@@ -196,20 +208,19 @@ namespace UnityEngine {
 				false);
 		}
 
-		[MenuItem("Build/Linux (x64)/Client")]
+		[MenuItem("Build/Linux (x64)/Client", priority = 110)]
 		public static void BuildLinuxClient() {
 			BuildLinux(false);
 		}
 
-		[MenuItem("Build/Linux (x64)/Server")]
+		[MenuItem("Build/Linux (x64)/Server", priority = 111)]
 		public static void BuildLinuxServer() {
 			BuildLinux(true);
 		}
 
-		[MenuItem("Build/Linux (x64)/Both")]
+		[MenuItem("Build/Linux (x64)/Both", priority = 112)]
 		public static void BuildLinuxBoth() {
 			BuildLinuxServer();
-			BuildStripper.RevertStrip();
 			BuildLinuxClient();
 		}
 		#endregion
@@ -226,17 +237,17 @@ namespace UnityEngine {
 				false);
 		}
 
-		[MenuItem("Build/Android/AAB")]
+		[MenuItem("Build/Android/AAB", priority = 120)]
 		public static void BuildAndroidBundle() {
 			BuildAndroid(true, BuildOptions.UncompressedAssetBundle);
 		}
 
-		[MenuItem("Build/Android/APK")]
+		[MenuItem("Build/Android/APK", priority = 121)]
 		public static void BuildAndroid() {
 			BuildAndroid(false, BuildOptions.None);
 		}
 
-		[MenuItem("Build/Android/Development (Run)")]
+		[MenuItem("Build/Android/Development (Run)", priority = 122)]
 		public static void BuildAndroidRun() {
 			BuildAndroid(false, BuildOptions.AutoRunPlayer | BuildOptions.Development);
 		}
